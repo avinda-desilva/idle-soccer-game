@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Goal Rush</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <div id="hud">
+      <div id="money-display">$0</div>
+      <div id="passive-rate">$0 / sec</div>
+    </div>
+
+    <div id="pitch-container">
+      <div id="goal"></div>
+      <canvas id="canvas"></canvas>
+      <div id="swipe-zone"></div>
+    </div>
+
+    <button id="shop-btn">🛒 UPGRADES</button>
+
+    <div id="shop-panel">
+      <div id="shop-drag-handle"></div>
+      <div id="shop-content"></div>
+    </div>
+
+    <div id="toast-container"></div>
+
+  </div>
+
+  <script type="module" src="game/engine.js"></script>
+</body>
+</html>
