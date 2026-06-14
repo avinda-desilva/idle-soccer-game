@@ -189,43 +189,7 @@ html, body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
-/* ---------- Shop panel (slide-up drawer) ---------- */
-#shop-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 85vh;
-  z-index: 300;
-  background: #1a1e1c;
-  border-radius: 20px 20px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-#shop-panel.open {
-  transform: translateY(0);
-}
-
-#shop-drag-handle {
-  width: 40px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
-  margin: 12px auto 8px;
-  flex-shrink: 0;
-}
-
-#shop-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 16px 32px;
-  -webkit-overflow-scrolling: touch;
-}
+/* ---------- Shop panel (slide-up drawer) — see === Shop Panel === below ---------- */
 
 /* ---------- Toast container ---------- */
 #toast-container {
@@ -258,4 +222,500 @@ html, body {
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   Animations & dynamic component styles
+   ============================================================ */
+
+/* ---------- Goal pulse (scored) ---------- */
+#goal.scored {
+  animation: goalPulse 0.6s ease forwards;
+}
+
+@keyframes goalPulse {
+  0%   { filter: drop-shadow(0 0 0px transparent); }
+  40%  { filter: drop-shadow(0 0 18px var(--gold)) drop-shadow(0 0 6px var(--gold)); }
+  100% { filter: drop-shadow(0 0 0px transparent); }
+}
+
+/* ---------- Floating score text ---------- */
+.float-text {
+  position: fixed;
+  transform: translateX(-50%);
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  pointer-events: none;
+  z-index: 500;
+  white-space: nowrap;
+  animation: floatUp 900ms ease forwards;
+}
+
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-60px); }
+}
+
+/* ---------- Toast slide animations ---------- */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(110%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(110%); }
+}
+
+/* Override existing .toast to use new animation names */
+.toast {
+  animation: slideInRight 0.3s ease forwards;
+  min-width: 200px;
+  max-width: 300px;
+  pointer-events: auto;
+}
+
+.toast-heading {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.toast-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ---------- Upgrade buy flash ---------- */
+@keyframes upgradeBuy {
+  0%   { background: var(--gold); transform: scale(1); }
+  50%  { background: var(--gold); transform: scale(1.04); }
+  100% { background: inherit;     transform: scale(1); }
+}
+
+/* ---------- VAR flash overlay ---------- */
+.var-flash-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--gold);
+  opacity: 0;
+  z-index: 600;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.var-flash-overlay span {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  padding: 0 24px;
+}
+
+@keyframes varFlash {
+  0%   { opacity: 0; }
+  17%  { opacity: 0.3; }
+  67%  { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-box {
+  background: #1a1e1c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.modal-box h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.modal-stat {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.modal-stat strong {
+  color: var(--text-primary);
+}
+
+.modal-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.modal-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 999px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.modal-btn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.modal-btn--confirm,
+.modal-btn:not(.modal-btn--cancel) {
+  background: var(--gold);
+  color: #1a1a1a;
+}
+
+.modal-btn--cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+/* === Shop Panel === */
+.shop-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.shop-backdrop.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#shop-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  height: 85vh;
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#shop-panel.is-open {
+  transform: translateY(0);
+}
+
+.drag-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--lines-dim);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 8px;
+  flex-shrink: 0;
+}
+.shop-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+.shop-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+/* === Category Tabs === */
+.category-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--lines-dim);
+}
+.category-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.category-tab.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  font-weight: 700;
+}
+
+/* === Cards List === */
+.cards-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px 16px 100px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* === Upgrade Card === */
+.upgrade-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--lines-dim);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: background 0.2s, opacity 0.2s;
+}
+.upgrade-card.locked {
+  opacity: 0.45;
+}
+.upgrade-card.maxed {
+  background: rgba(244, 197, 66, 0.08);
+  border-color: rgba(244, 197, 66, 0.25);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.card-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-level {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.card-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.card-effect {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.card-unlock-hint {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* === Progress Bar === */
+.progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* === Card Footer (buy row) === */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-cost {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* === Buy Button === */
+.buy-btn {
+  background: var(--gold);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.buy-btn:active {
+  transform: scale(0.96);
+}
+.buy-btn:disabled {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.max-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.875rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+/* === Card Animations === */
+@keyframes upgradeBuy {
+  0%   { background: rgba(244, 197, 66, 0.35); transform: scale(1.02); }
+  100% { background: rgba(255, 255, 255, 0.07); transform: scale(1); }
+}
+.upgrade-card.buying {
+  animation: upgradeBuy 0.4s ease-out forwards;
+}
+
+@keyframes cardShake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  60%       { transform: translateX(6px); }
+}
+.upgrade-card.shake {
+  animation: cardShake 0.18s ease-out;
+}
+
+/* === Quick-Buy Row === */
+.quick-buy-row {
+  position: fixed;
+  bottom: 72px;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 16px;
+  z-index: 5;
+  pointer-events: none;
+}
+.quick-buy-pill {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--lines-dim);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  pointer-events: all;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+}
+.quick-buy-pill:active {
+  transform: scale(0.95);
+}
+.quick-buy-pill:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* === Empty State === */
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  padding: 40px 20px;
+}
+
+/* === Stats Table === */
+.stats-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+}
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--lines-dim);
+}
+.stats-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.stats-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
 }
