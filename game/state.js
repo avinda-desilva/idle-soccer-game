@@ -8,8 +8,11 @@ import {
   GOAL_WIDTH_PER_UPGRADE,
   GOAL_HEIGHT_PER_UPGRADE,
   BASE_GOAL_VALUE,
-  FAN_MILESTONES,
 } from "./constants.js";
+import {
+  calcMoneyPerGoal,
+  calcTotalPassiveIncome,
+} from "./economy.js";
 
 export const DEFAULT_STATE = {
   money: 0,
@@ -70,21 +73,8 @@ export function getState() {
 export function recalcDerivedState(s = state) {
   const u = s.upgrades;
 
-  s.moneyPerGoal =
-    (BASE_GOAL_VALUE + u.richBall * 2 + u.fanCheer * 1) * s.prestigeMultiplier;
-
-  let passive = 0;
-  passive += u.sponsorDeal * 5;
-  passive += u.stadiumLevel * 25;
-  passive += u.stadiumAds * 100;
-  passive += u.transferMarket * 500;
-  passive += u.bootRoom * 1000;
-  for (let i = 0; i < s.unlockedFanMilestones.length; i++) {
-    const idx = s.unlockedFanMilestones[i];
-    const m = FAN_MILESTONES[idx];
-    if (m) passive += m.income;
-  }
-  s.passiveIncome = passive * s.prestigeMultiplier;
+  s.moneyPerGoal = calcMoneyPerGoal(s);
+  s.passiveIncome = calcTotalPassiveIncome(s);
 
   s.goalWidth = Math.min(
     GOAL_MAX_WIDTH,
