@@ -54,6 +54,11 @@ export function calcTotalPassiveIncome(state) {
 
 export function checkFanMilestones(state) {
   const newlyUnlocked = [];
+  const hasPassiveUpgrade = state.upgrades.autoShooter > 0 || state.upgrades.sponsorDeal > 0 ||
+    state.upgrades.stadiumLevel > 0 || state.upgrades.stadiumAds > 0 || state.upgrades.transferMarket > 0;
+
+  if (!hasPassiveUpgrade) return newlyUnlocked;
+
   FAN_MILESTONES.forEach((milestone, i) => {
     if (
       !state.unlockedFanMilestones.includes(i) &&

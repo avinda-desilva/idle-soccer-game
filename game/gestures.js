@@ -1,42 +1,28 @@
-// gestures.js — swipe detection, direction classification, and power scoring
+// gestures.js — swipe detection. Records the pointer path and forwards it to
+// physics.applySwipe so a swipe can intersect resting balls and launch them.
 
-import {
-  MIN_SWIPE_PX,
-  MAX_SWIPE_SPEED,
-  POWER_FACTOR,
-} from "./constants.js";
+import { applySwipe } from "./physics.js";
 
-const SWIPE_LOCKOUT_MS = 600;
+const MIN_SWIPE_DIST = 30;
+const MAX_PATH_SAMPLES = 64;
 
 function vibrate(pattern) {
   if (navigator.vibrate) {
-    try {
-      navigator.vibrate(pattern);
-    } catch (_) {}
+    try { navigator.vibrate(pattern); } catch (_) {}
   }
-}
-
-function ensureSwipeHint(zone) {
-  let hint = document.getElementById("swipe-hint");
-  if (!hint) {
-    hint = document.createElement("div");
-    hint.id = "swipe-hint";
-    hint.textContent = "↑";
-    document.body.appendChild(hint);
-  }
-  return hint;
 }
 
 export function initGestures(state, onSwipe) {
-  const zone = document.getElementById("swipe-zone");
+  // Listen on pitch-container so swipes anywhere on the pitch register —
+  // resting balls live in the bottom half and the swipe path itself is what
+  // determines which (if any) ball gets launched.
+  const zone = document.getElementById("pitch-container")
+            || document.getElementById("swipe-zone");
   if (!zone) return;
-  const hint = ensureSwipeHint(zone);
+  zone.style.touchAction = "none";
 
-  let startX = 0;
-  let startY = 0;
+  let path = [];
   let startTime = 0;
-  let currentX = 0;
-  let currentY = 0;
   let tracking = false;
   let pointerId = null;
 
@@ -44,57 +30,44 @@ export function initGestures(state, onSwipe) {
     if (tracking) return;
     tracking = true;
     pointerId = e.pointerId;
-    startX = currentX = e.clientX;
-    startY = currentY = e.clientY;
-    startTime = Date.now();
-    hint.style.left = e.clientX + "px";
-    hint.style.top = e.clientY + "px";
-    hint.style.opacity = "0.55";
-    try {
-      zone.setPointerCapture(e.pointerId);
-    } catch (_) {}
+    path = [{ x: e.clientX, y: e.clientY }];
+    startTime = performance.now();
+    try { zone.setPointerCapture(e.pointerId); } catch (_) {}
   }
 
   function onMove(e) {
     if (!tracking || e.pointerId !== pointerId) return;
-    currentX = e.clientX;
-    currentY = e.clientY;
+    path.push({ x: e.clientX, y: e.clientY });
+    if (path.length > MAX_PATH_SAMPLES) {
+      // Keep first sample + most recent — preserves overall direction
+      path = [path[0], ...path.slice(-MAX_PATH_SAMPLES + 1)];
+    }
   }
 
   function onUp(e) {
     if (!tracking || e.pointerId !== pointerId) return;
     tracking = false;
-    hint.style.opacity = "0";
-    try {
-      zone.releasePointerCapture(e.pointerId);
-    } catch (_) {}
+    try { zone.releasePointerCapture(e.pointerId); } catch (_) {}
 
-    const deltaY = startY - currentY;
-    const deltaX = currentX - startX;
-    const elapsed = Date.now() - startTime || 1;
+    const elapsed = Math.max(1, performance.now() - startTime);
+    if (path.length < 2) return;
 
-    if (deltaY < MIN_SWIPE_PX) return;
-    if (state.swipeActive) return;
+    const sx = path[0].x, sy = path[0].y;
+    const ex = path[path.length - 1].x, ey = path[path.length - 1].y;
+    const dist = Math.hypot(ex - sx, ey - sy);
+    if (dist < MIN_SWIPE_DIST) return;
 
-    let swipeSpeed = (deltaY / elapsed) * 1000 * 0.04;
-    swipeSpeed = Math.max(0, Math.min(MAX_SWIPE_SPEED, swipeSpeed));
-
-    const vy = -(swipeSpeed * POWER_FACTOR);
-    const vx = (deltaX / 120) * 2.5;
-
-    state.swipeActive = true;
-    vibrate(30);
-    onSwipe(vx, vy);
-
-    setTimeout(() => {
-      state.swipeActive = false;
-    }, SWIPE_LOCKOUT_MS);
+    const launched = applySwipe(path, elapsed);
+    if (launched > 0) {
+      vibrate(25);
+      if (typeof onSwipe === "function") onSwipe(launched);
+    }
   }
 
   function onCancel(e) {
     if (e.pointerId !== pointerId) return;
     tracking = false;
-    hint.style.opacity = "0";
+    path = [];
   }
 
   zone.addEventListener("pointerdown", onDown);

@@ -75,6 +75,7 @@ export function recalcDerivedState(s = state) {
 
   s.moneyPerGoal = calcMoneyPerGoal(s);
   s.passiveIncome = calcTotalPassiveIncome(s);
+  s.ballCount = 1 + (u.extraBalls || 0);
 
   s.goalWidth = Math.min(
     GOAL_MAX_WIDTH,

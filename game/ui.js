@@ -28,33 +28,30 @@ export function initUI(state) {
 
 // ─── HUD ─────────────────────────────────────────────────────────────────────
 
-let _currentDisplayedMoney = 0;
-let _rafId = null;
+let _displayedMoney = 0;       // value currently shown on screen
+let _targetMoney = 0;          // value we're animating toward
+let _hudRafId = null;
 
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3);
-}
-
-function animateCounter(el, from, to, duration = 300) {
-  if (_rafId) cancelAnimationFrame(_rafId);
-  const start = performance.now();
-  function step(now) {
-    const elapsed = now - start;
-    const t = Math.min(elapsed / duration, 1);
-    const value = from + (to - from) * easeOutCubic(t);
-    el.textContent = formatMoney(value);
-    if (t < 1) {
-      _rafId = requestAnimationFrame(step);
-    } else {
-      _rafId = null;
-      _currentDisplayedMoney = to;
-    }
+// Single persistent rAF loop — eases _displayedMoney toward _targetMoney.
+// updateHUD just bumps the target; we never restart the animation from a
+// stale baseline, which was the cause of the jittery counter.
+function hudFrame() {
+  const diff = _targetMoney - _displayedMoney;
+  if (Math.abs(diff) < 0.005) {
+    _displayedMoney = _targetMoney;
+    els.moneyDisplay.textContent = formatMoney(_displayedMoney);
+    _hudRafId = null;
+    return;
   }
-  _rafId = requestAnimationFrame(step);
+  // Exponential approach — fast enough to feel responsive, smooth at small deltas.
+  _displayedMoney += diff * 0.18;
+  els.moneyDisplay.textContent = formatMoney(_displayedMoney);
+  _hudRafId = requestAnimationFrame(hudFrame);
 }
 
 export function updateHUD(state) {
-  animateCounter(els.moneyDisplay, _currentDisplayedMoney, state.money);
+  _targetMoney = state.money;
+  if (_hudRafId == null) _hudRafId = requestAnimationFrame(hudFrame);
 
   if (state.passiveIncome > 0) {
     els.passiveRate.textContent = `+${formatMoney(state.passiveIncome)}/sec`;
@@ -182,8 +179,9 @@ export function showOfflineModal(earned, secondsAway, state) {
   `;
   document.body.appendChild(overlay);
 
+  // Earnings have already been credited to state.money by the engine before
+  // this modal is shown — Collect just dismisses the dialog.
   overlay.querySelector("#offline-collect-btn").addEventListener("click", () => {
-    state.money += earned;
     overlay.remove();
   });
 }

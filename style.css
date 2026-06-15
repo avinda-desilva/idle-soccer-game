@@ -152,12 +152,14 @@ html, body {
 
 /* ---------- Swipe zone ---------- */
 #swipe-zone {
+  /* Legacy element — pointer events are now handled on #pitch-container.
+     Make this transparent to events so it doesn't block the new handler. */
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 40%;
-  /* transparent — captures touch/pointer events */
+  pointer-events: none;
   touch-action: none;
   cursor: default;
 }
